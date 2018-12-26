@@ -28,33 +28,33 @@ class DataRecordForm(tk.Frame):
         # Line 1
         self.inputs['Date'] = w.LabelInput(
                 recordinfo, "Date",
-                fields_spec=fields['Date'])
+                field_spec=fields['Date'])
         self.inputs['Date'].grid(row=0, column=0)
         
         self.inputs['Time'] = w.LabelInput(
                 recordinfo, "Time",
-                fields_spec=fields['Time'])
+                field_spec=fields['Time'])
         self.inputs['Time'].grid(row=0, column=1)
         
         self.inputs['Technician'] = w.LabelInput(
                 recordinfo, "Technician",
-                fields_spec=fields['Technician'])
+                field_spec=fields['Technician'])
         self.inputs['Technician'].grid(row=0, column=2)
         
         # Line 2
         self.inputs['Lab'] = w.LabelInput(
                 recordinfo, "Lab",
-                fields_spec=fields['Lab'])
+                field_spec=fields['Lab'])
         self.inputs['Lab'].grid(row=1, column=0)
         
         self.inputs['Plot'] = w.LabelInput(
                 recordinfo, "Plot",
-                fields_spec=fields['Plot'])
+                field_spec=fields['Plot'])
         self.inputs['Plot'].grid(row=1, column=1)
         
         self.inputs['Seed sample'] = w.LabelInput(
                 recordinfo, "Seed sample",
-                fields_spec=fields['Seed sample'])
+                field_spec=fields['Seed sample'])
         self.inputs['Seed sample'].grid(row=1, column=2)
         
         recordinfo.grid(row=0, column=0, sticky=tk.W + tk.E)
@@ -65,23 +65,23 @@ class DataRecordForm(tk.Frame):
         # Line 1
         self.inputs['Humidity'] = w.LabelInput(
                 environmentinfo, "Humidity (g/m3)",
-                fields_spec=fields['Humidity'])
+                field_spec=fields['Humidity'])
         self.inputs['Humidity'].grid(row=0, column=0)
 
         self.inputs['Light'] = w.LabelInput(
                 environmentinfo, "Light (klx)",
-                fields_spec=fields['Light'])
+                field_spec=fields['Light'])
         self.inputs['Light'].grid(row=0, column=1)
 
         self.inputs['Temperature'] = w.LabelInput(
                 environmentinfo, "Temperature (°C)",
-                fields_spec=fields['Temperature'])
+                field_spec=fields['Temperature'])
         self.inputs['Temperature'].grid(row=0, column=2)        
         
         # Line 2
         self.inputs['Equipment Fault'] = w.LabelInput(
                 environmentinfo, "Equipment Fault",
-                fields_spec=fields['Equipment Fault'])
+                field_spec=fields['Equipment Fault'])
         self.inputs['Equipment Fault'].grid(row=1, column=0, columnspan=3)
         
         environmentinfo.grid(row=1, column=0, sticky=tk.W + tk.E)
@@ -92,17 +92,17 @@ class DataRecordForm(tk.Frame):
         # Line 1
         self.inputs['Plants'] = w.LabelInput(
                 plantinfo, "Plants",
-                fields_spec=fields['Plants'])
+                field_spec=fields['Plants'])
         self.inputs['Plants'].grid(row=0, column=0)    
         
         self.inputs['Blossoms'] = w.LabelInput(
                 plantinfo, "Blossoms",
-                fields_spec=fields['Blossoms'])
+                field_spec=fields['Blossoms'])
         self.inputs['Blossoms'].grid(row=0, column=1)   
 
         self.inputs['Fruit'] = w.LabelInput(
                 plantinfo, "Fruit",
-                fields_spec=fields['Fruit'])
+                field_spec=fields['Fruit'])
         self.inputs['Fruit'].grid(row=0, column=2)   
         
         # Line 2
@@ -114,23 +114,23 @@ class DataRecordForm(tk.Frame):
         
         self.inputs['Min Height'] = w.LabelInput(
                 plantinfo, "Min Height (cm)",
-                fields_spec=fields['Min Height'],
+                field_spec=fields['Min Height'],
                 input_args={"max_var":max_height_var,
                             "focus_update_var":min_height_var})
 
         self.inputs['Max Height'] = w.LabelInput(
                 plantinfo, "Max Height (cm)",
-                fields_spec=fields['Max Height'],
+                field_spec=fields['Max Height'],
                 input_args={"min_var":min_height_var,
                             "focus_update_var":max_height_var})
         
-        self.inputs['Max Height'].grid(row=1, column=0)       
+        self.inputs['Min Height'].grid(row=1, column=0)       
 
-        self.inputs['Min Height'].grid(row=1, column=1)    
+        self.inputs['Max Height'].grid(row=1, column=1)    
 
         self.inputs['Median Height'] = w.LabelInput(
                 plantinfo, "Median Height (cm)",
-                fields_spec=fields['Median Height'],
+                field_spec=fields['Median Height'],
                 input_args={"min_var":min_height_var,
                             "max_var":max_height_var})
     
@@ -141,7 +141,7 @@ class DataRecordForm(tk.Frame):
         # Notes Section
         self.inputs['Notes'] = w.LabelInput(
                 self, "Notes",
-                fields_spec=fields['Notes'])
+                field_spec=fields['Notes'])
         self.inputs['Notes'].grid(sticky="w", row=3, column=0)
  
         self.reset()

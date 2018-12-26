@@ -39,7 +39,7 @@ class CSVModel:
                        'min': 0, 'max': 1000, 'inc': .01},
         "Max Height": {'req': True, 'type': FT.decimal,
                        'min': 0, 'max': 1000, 'inc': .01},
-         "Median Height": {'req': True, 'type': FT.decimal,
+        "Median Height": {'req': True, 'type': FT.decimal,
                           'min': 0, 'max': 1000, 'inc': .01},
         "Notes": {'req': False, 'type': FT.long_string}
     }

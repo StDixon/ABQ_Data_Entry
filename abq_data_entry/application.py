@@ -8,6 +8,7 @@ Created on Wed Dec 26 15:33:07 2018
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 from datetime import datetime
 
@@ -29,7 +30,7 @@ class Application(tk.Tk):
                   ).grid(row=0)
         
         # Form
-        self.recordform = v.DataRecordForm(self)
+        self.recordform = v.DataRecordForm(self,m.CSVModel.fields)
         self.recordform.grid(row=1, padx=10)
         
         self.savebutton = ttk.Button(self, text="Save",
@@ -48,9 +49,13 @@ class Application(tk.Tk):
         """Handles save button clicks"""
         errors = self.recordform.get_errors()
         if errors:
+            message="Cannot save record"
+            detail="The following fields have errors: \n *{}".format(
+            '\n *'.join(errors.keys()))
             self.status.set(
                     "Cannot save, errors in fields: {}"
                     .format(','.join(errors.keys())))
+            messagebox.showerror(title='Error',message=message,detail=detail)
             return False
         
         #for now a hardcoded filename

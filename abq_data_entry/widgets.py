@@ -150,8 +150,8 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
 class ValidatedSpinbox(ValidatedMixin, tk.Spinbox):
     
     def __init__(self, *args, min_var=None, max_var=None,
-                 focus_update_var=None, from_='-Infinity',
-                 to='Infinity', **kwargs):
+                 focus_update_var=None, from_='-infinity',
+                 to='infinity', **kwargs):
         super().__init__(*args, from_=from_, to=to, **kwargs)
         self.resolution = Decimal(str(kwargs.get('increment','1.0')))
         self.precision = (self.resolution.normalize().as_tuple().exponent)
@@ -273,7 +273,7 @@ class LabelInput(tk.Frame):
         FT.boolean: (ttk.Checkbutton, tk.BooleanVar)
     }
     
-    def __init__(self, parent, label='', input_class=ttk.Entry,
+    def __init__(self, parent, label='', input_class=None,
                  input_var=None, input_args=None, label_args=None,
                  field_spec=None,**kwargs):
         super().__init__(parent, **kwargs)
