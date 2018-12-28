@@ -56,7 +56,7 @@ class CSVModel:
             records = self.get_all_records()
             records[rownum] = data
             
-            with open(self.filename, 'w') as fh:
+            with open(self.filename, 'w',encoding='utf-8') as fh:
                 csvwriter = csv.DictWriter(fh, 
                     fieldnames=self.fields.keys())
                 csvwriter.writeheader()
@@ -66,7 +66,7 @@ class CSVModel:
 
             newfile = not os.path.exists(self.filename)
 
-            with open(self.filename, 'a') as fh:
+            with open(self.filename, 'a',encoding='utf-8') as fh:
                 csvwriter = csv.DictWriter(fh, 
                     fieldnames=self.fields.keys())
                 if newfile:
@@ -77,7 +77,7 @@ class CSVModel:
         if not os.path.exists(self.filename):
             return[]
             
-        with open(self.filename,'r') as fh:
+        with open(self.filename,'r',encoding='utf-8') as fh:
             csvreader = csv.DictReader(fh)
             missing_fields = (set(self.fields.keys())-
                                   set(csvreader.fieldnames))

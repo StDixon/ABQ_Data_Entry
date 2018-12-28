@@ -12,8 +12,12 @@ from tkinter import filedialog
 from tkinter import messagebox
 from tkinter.font import nametofont
 
+import platform
+from os import environ
+
 from datetime import datetime
 
+from .mainmenu import get_main_menu_for_os
 from . import views as v
 from . import models as m
 
@@ -22,6 +26,12 @@ from .images import ABQ_LOGO_64
 
 class Application(tk.Tk):
     """Application root window"""
+    
+    config_dirs = {
+            'Linux': environ.get('$XDG_CONFIG_HOME', '~/.config'),
+            'freebsd7': environ.get('$XDG_CONFIG_HOME', '~/.config'),
+            'Darwin': '~/Library/Application Support',
+            'Windows': '~/AppData/Local'}
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,7 +54,8 @@ class Application(tk.Tk):
         self.filename = tk.StringVar(value=default_filename)
         self.data_model = m.CSVModel(filename=self.filename.get())
         
-        self.settings_model = m.SettingsModel()
+        config_dir = self.config_dirs.get(platform.system(),'~')
+        self.settings_model = m.SettingsModel(path=config_dir)
         self.load_settings()
         
         style=ttk.Style()
@@ -72,7 +83,9 @@ class Application(tk.Tk):
         self.call('wm','iconphoto',self._w,self.taskbar_icon)
         
         # menu
-        menu = v.MainMenu(self,self.settings,self.callbacks)
+        menu_class = get_main_menu_for_os(platform.system())
+        menu = menu_class(self, self.settings, self.callbacks)
+
         self.config(menu=menu)
         
         # Record Form

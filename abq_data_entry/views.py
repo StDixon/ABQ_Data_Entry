@@ -8,7 +8,6 @@ Created on Wed Dec 26 15:32:38 2018
 
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
 
 from datetime import datetime
 
@@ -261,106 +260,6 @@ class DataRecordForm(tk.Frame):
                     widget.input.trigger_focusout_validation()
                 except AttributeError:
                     pass
-                
-                                     
-
-class MainMenu(tk.Menu):
-    """The Applications's mainn menu"""
-    
-    def __init__(self,parent,settings,callbacks,**kwargs):
-        super().__init__(parent,**kwargs)
-        
-        file_menu = tk.Menu(self,tearoff=False)
-        file_menu.add_command(
-                label="Select file...",
-                command=callbacks['file->open'])
-        file_menu.add_separator()
-        file_menu.add_command(
-                label="Quit",
-                command=callbacks['file->quit'])
-        
-        self.add_cascade(
-                label='File',
-                menu=file_menu)
-        
-        options_menu = tk.Menu(self,tearoff=False)
-        options_menu.add_checkbutton(
-                label='Autofill Date',
-                variable=settings['autofill date'])
-        options_menu.add_checkbutton(
-                label='Autofill Sheet data',
-                variable=settings['autofill sheet data'])
- 
-        font_size_menu = tk.Menu(self,tearoff=False)
-        for size in range(6, 17, 1):
-            font_size_menu.add_radiobutton(
-                label=size,
-                value=size,
-                variable=settings['font size'])
-        
-        options_menu.add_cascade(
-                label='Font size',
-                menu=font_size_menu)
-        
-        style = ttk.Style()
-        themes_menu = tk.Menu(self,tearoff=False)
-        for theme in style.theme_names():
-            themes_menu.add_radiobutton(
-                    label=theme,
-                    value=theme,
-                    variable=settings['theme']
-                    )
-            
-        options_menu.add_cascade(
-                label='Theme',
-                menu=themes_menu)
-         
-        self.add_cascade(
-                label='Options',
-                menu=options_menu)
-        
-        go_menu = tk.Menu(self,tearoff=False)
-        go_menu.add_command(label="Record List",
-                            command=callbacks['show_recordlist'])
-        go_menu.add_command(label="New Record",
-                            command=callbacks['new_record'])
-        
-        self.add_cascade(
-                label='Go',
-                menu=go_menu)
-        
-        help_menu = tk.Menu(self,tearoff=False)
-        help_menu.add_command(
-                label='About...',
-                command=self.show_about)
-        
-        self.add_cascade(
-                label='Help',
-                menu=help_menu)
-        
-        settings['theme'].trace('w',self.on_theme_change)
-        
-    def show_about(self):
-        """Show the about dialog"""
-        
-        about_message = 'ABQ Data Entry'
-        about_detail = ('by Alan D Moore\n'
-                        'For assistance please contact the author.')
-        
-        messagebox.showinfo(title='About',
-                            message=about_message,
-                            detail=about_detail)
-        
-    def on_theme_change(self,*args):
-        """Pop up a message about theme changes"""
-        message= "Change requires restart"
-        detail = (
-                "Theme changes do not take effect"
-                " until application restart")
-        messagebox.showwarning(
-                title='Warning',
-                message=message,
-                detail=detail)
 
 class RecordList(tk.Frame):
     """Display for CSV file contents"""
