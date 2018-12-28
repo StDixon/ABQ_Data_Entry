@@ -14,6 +14,11 @@ from decimal import Decimal, InvalidOperation
 
 from .constants import FieldTypes as FT
 
+class TtkSpinbox(ttk.Entry):
+    
+    def __init__(self,parent=None,**kwargs):
+        super().__init__(parent,'ttk::spinbox',**kwargs)
+        
 class ValidatedMixin:
     """Adds a validation functionality to an input widget"""
     
@@ -24,16 +29,23 @@ class ValidatedMixin:
         vcmd = self.register(self._validate)
         invcmd = self.register(self._invalid)
         
+        style = ttk.Style()
+        widget_class = self.winfo_class()
+        validated_style = 'ValidatedInput.' + widget_class
+        
+        style.map(
+                validated_style,
+                foreground=[('invalid','white'),('!invalid','black')],
+                fieldbackground=[('invalid','darkred'),('!invalid','white')])
+
         self.config(
+                style=validated_style,
                 validate='all',
                 validatecommand=(vcmd, '%P', '%s', '%S', '%V', '%i', '%d'),
                 invalidcommand=(invcmd, '%P', '%s', '%S', '%V', '%i', '%d'))
         
-    def _toggle_error(self, on=False):
-        self.config(foreground=('red' if on else 'black'))
-        
     def _validate(self, proposed, current, char, event, index, action):
-        self._toggle_error(False)
+        
         self.error.set('')
         valid = True
         if event == 'focusout':
@@ -59,9 +71,11 @@ class ValidatedMixin:
                               index=index, action=action)
             
     def _focusout_invalid(self, **kwargs):
-        self._toggle_error(True)
+        
+        pass
                 
     def _key_invalid(self, **kwargs):
+        
         pass
             
     def trigger_focusout_validation(self):
@@ -147,7 +161,7 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
         
         return valid
 
-class ValidatedSpinbox(ValidatedMixin, tk.Spinbox):
+class ValidatedSpinbox(ValidatedMixin, TtkSpinbox):
     
     def __init__(self, *args, min_var=None, max_var=None,
                  focus_update_var=None, from_='-infinity',
@@ -312,7 +326,8 @@ class LabelInput(tk.Frame):
         self.columnconfigure(0, weight=1)
         
         self.error = getattr(self.input, 'error', tk.StringVar())
-        self.error_label = ttk.Label(self, textvariable=self.error)
+        self.error_label = ttk.Label(self, textvariable=self.error,
+                                     **label_args)
         
         self.error_label.grid(row=2, column=0, sticky=(tk.W + tk.E))
         
@@ -348,3 +363,4 @@ class LabelInput(tk.Frame):
         else: # input must be Entry-type widget with no variable
             self.input.delete(0, tk.END)
             self.input.insert(0, value)
+

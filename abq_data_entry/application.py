@@ -8,12 +8,17 @@ Created on Wed Dec 26 15:33:07 2018
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from tkinter import messagebox
+from tkinter.font import nametofont
 
 from datetime import datetime
 
 from . import views as v
 from . import models as m
+
+from .images import ABQ_LOGO_32
+from .images import ABQ_LOGO_64
 
 class Application(tk.Tk):
     """Application root window"""
@@ -24,18 +29,65 @@ class Application(tk.Tk):
         self.title("ABQ Data Entry Application")
         self.resizable(width=False, height=False)
         
+        self.inserted_rows = []
+        self.updated_rows = []
+        
         ttk.Label(self,
                   text="ABQ Data Entry Application",
                   font=("TkDefaultFont", 16)
                   ).grid(row=0)
+
+        #for now a hardcoded filename
+        datestring = datetime.today().strftime("%Y-%m-%d")
+        default_filename = "abq_data_record_{}.csv".format(datestring)
         
-        # Form
-        self.recordform = v.DataRecordForm(self,m.CSVModel.fields)
-        self.recordform.grid(row=1, padx=10)
+        self.filename = tk.StringVar(value=default_filename)
+        self.data_model = m.CSVModel(filename=self.filename.get())
         
-        self.savebutton = ttk.Button(self, text="Save",
-                                     command=self.on_save)
-        self.savebutton.grid(sticky=tk.E, row=2, padx=10)
+        self.settings_model = m.SettingsModel()
+        self.load_settings()
+        
+        style=ttk.Style()
+        theme = self.settings.get('theme').get()
+        if theme in style.theme_names():
+            style.theme_use(theme)
+        
+        self.set_font()
+        self.settings['font size'].trace('w',self.set_font)
+        
+        self.callbacks = {
+                'file->open':self.on_file_select,
+                'file->quit':self.quit,
+                'show_recordlist':self.show_recordlist,
+                'new_record':self.open_record,
+                'on_open_record':self.open_record,
+                'on_save':self.on_save
+                }
+        # logo
+        self.logo = tk.PhotoImage(file=ABQ_LOGO_32)
+        tk.Label(self,image=self.logo).grid(row=1)
+        
+        # icon
+        self.taskbar_icon = tk.PhotoImage(file=ABQ_LOGO_64)
+        self.call('wm','iconphoto',self._w,self.taskbar_icon)
+        
+        # menu
+        menu = v.MainMenu(self,self.settings,self.callbacks)
+        self.config(menu=menu)
+        
+        # Record Form
+        self.recordform = v.DataRecordForm(self,m.CSVModel.fields,self.settings,
+                                           self.callbacks)
+        self.recordform.grid(row=2, padx=10, sticky='NSEW')
+ 
+        # Record list
+        self.recordlist = v.RecordList(self,
+                                       self.callbacks,
+                                       self.inserted_rows,
+                                       self.updated_rows
+                                       )
+        self.recordlist.grid(row=2, padx=10, sticky='NSEW')
+        self.populate_recordlist()
         
         # Status Bar
         self.status = tk.StringVar()
@@ -55,20 +107,120 @@ class Application(tk.Tk):
             self.status.set(
                     "Cannot save, errors in fields: {}"
                     .format(','.join(errors.keys())))
-            messagebox.showerror(title='Error',message=message,detail=detail)
+            messagebox.showerror(title='Error',
+                                 message=message,
+                                 detail=detail)
             return False
         
-        #for now a hardcoded filename
-        datestring = datetime.today().strftime("%Y-%m-%d")
-        filename = "abq_data_record_{}.csv".format(datestring)
+        filename=self.filename.get()
+        
         model = m.CSVModel(filename)
                 
         data=self.recordform.get()
-        
-        model.save_record(data)
+        rownum = self.recordform.current_record
+        try:
+            model.save_record(data,rownum)
+        except IndexError as e:
+            messagebox.showerror(title='Error',
+                                 message='Invalid row specified',
+                                 detail=str(e))
+            self.status.set("Tried to update invalid row")
+        except Exception as e:
+            messagebox.showerror(title='Error',
+                                 message='Problem saving record',
+                                 detail=str(e))
+            self.status.set("Problem saving record") 
+        else:
+            if rownum is not None:
+                self.updated_rows.append(rownum)
+            else:
+                rownum = len(self.data_model.get_all_records())-1
+                self.inserted_rows.append(rownum)
             
-        self.records_saved += 1
-        self.status.set(
-                "{} records saved this session".format(self.records_saved))
+            self.records_saved += 1
+            self.status.set(
+                    "{} records saved this session".format(self.records_saved))
+            self.populate_recordlist()
+            
+            if self.recordform.current_record is None:
+                self.recordform.reset()
         
-        self.recordform.reset()
+    def on_file_select(self):
+        """Handle the file->select action from the menu"""
+        
+        filename = filedialog.asksaveasfilename(
+                title='Select the target file for saving records',
+                defaultextension='.csv',
+                filetypes=['Comma-Separated Values','*.csv *.CSV'])
+        
+        if filename:
+            self.filename.set(filename)
+            self.data_model = m.CSVModel(filename=self.filename.get())
+            self.populate_recordlist()
+            self.inserted_rows = []
+            self.updated_rows = []
+
+    def load_settings(self):
+        """Load settings into self.settings dict."""
+        
+        vartypes = {
+                'bool':tk.BooleanVar,
+                'str':tk.StringVar,
+                'int':tk.IntVar,
+                'float':tk.DoubleVar
+                }
+        
+        self.settings = {}
+        for key,data in self.settings_model.variables.items():
+            vartype = vartypes.get(data['type'],tk.StringVar)
+            self.settings[key] = vartype(value=data['value'])
+            
+        for var in self.settings.values():
+            var.trace('w',self.save_settings)
+            
+    def save_settings(self,*args):
+        """Save the current settings to a preferences file"""
+        
+        for key,variable in self.settings.items():
+            self.settings_model.set(key,variable.get())
+            
+        self.settings_model.save()
+        
+    def populate_recordlist(self):
+        
+        try:
+            rows = self.data_model.get_all_records()
+        except Exception as e:
+            messagebox.showerror(title='Error',
+                                 message='Problem reading file',
+                                 detail=str(e))
+        else:
+            self.recordlist.populate(rows)
+            
+    def show_recordlist(self):
+        """Show the record form"""
+        self.recordlist.tkraise()
+        
+    
+    def open_record(self,rownum=None):
+        if rownum is None:
+            record = None
+        else:
+            rownum = int(rownum)
+            try:
+                record = self.data_model.get_record(rownum)
+            except Exception as e:
+                messagebox.showerror(title='Error',
+                                     message='Problem reading file',
+                                     detail=str(e))
+                return
+        
+        self.recordform.load_record(rownum,record)
+        self.recordform.tkraise()
+    
+    def set_font(self,*args):
+        font_size = self.settings['font size'].get()
+        font_names = ('TkDefaultFont','TkMenuFont','TkTextFont')
+        for font_name in font_names:
+            tk_font = nametofont(font_name)
+            tk_font.config(size=font_size)
