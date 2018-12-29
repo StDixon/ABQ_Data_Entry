@@ -78,7 +78,7 @@ class CSVModel:
             return[]
             
         with open(self.filename,'r',encoding='utf-8') as fh:
-            csvreader = csv.DictReader(fh)
+            csvreader = csv.DictReader(list(fh.readlines()))
             missing_fields = (set(self.fields.keys())-
                                   set(csvreader.fieldnames))
             if len(missing_fields) > 0:
